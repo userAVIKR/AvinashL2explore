@@ -53,7 +53,7 @@ JsonPowerDB provides several advantages over traditional databases:
 
 **Avinash Kumar**  
 B.Tech CSE Student  
-Frontend Developer  
+  
 
 ---
 
