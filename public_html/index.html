@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Enrollment Form</title>
+
+   
+    <link rel="stylesheet" href="bootstrap.min.css">
+
+  
+    <script src="jquery-3.7.1.min.js"></script>
+
+   
+    <script src="jpdb-commons.js"></script>
+
+    <script>
+        
+        jQuery.ajaxSetup({ async: false });
+
+        
+        var connToken = "764066766|7385821545027424680|764067017";
+        var dbName = "SCHOOL-DB";
+        var relName = "STUDENT-TABLE";
+        var baseUrl = "http://api.login2explore.com:5577";
+        var iml = "/api/iml";
+        var irl = "/api/irl";
+
+      
+        function resetForm() {
+            document.getElementById("studentForm").reset();
+
+            rollNo.disabled = false;
+            fullName.disabled = true;
+            className.disabled = true;
+            birthDate.disabled = true;
+            address.disabled = true;
+            enrollDate.disabled = true;
+
+            saveBtn.disabled = true;
+            updateBtn.disabled = true;
+            resetBtn.disabled = true;
+
+            rollNo.focus();
+        }
+
+        
+        function checkRollNo() {
+            var roll = rollNo.value;
+            if (roll === "") return;
+
+            var req = createGET_BY_KEYRequest(
+                connToken,
+                dbName,
+                relName,
+                JSON.stringify({ rollNo: roll })
+            );
+
+            var res = executeCommandAtGivenBaseUrl(req, baseUrl, irl);
+
+            if (res.status === 400) {
+              
+                fullName.disabled = false;
+                className.disabled = false;
+                birthDate.disabled = false;
+                address.disabled = false;
+                enrollDate.disabled = false;
+
+                saveBtn.disabled = false;
+                resetBtn.disabled = false;
+
+                fullName.focus();
+            } 
+            else if (res.status === 200) {
+               
+                var data = JSON.parse(res.data).record;
+
+                fullName.value = data.fullName;
+                className.value = data.className;
+                birthDate.value = data.birthDate;
+                address.value = data.address;
+                enrollDate.value = data.enrollDate;
+
+                rollNo.disabled = true;
+
+                fullName.disabled = false;
+                className.disabled = false;
+                birthDate.disabled = false;
+                address.disabled = false;
+                enrollDate.disabled = false;
+
+                updateBtn.disabled = false;
+                resetBtn.disabled = false;
+
+                fullName.focus();
+            }
+        }
+
+       
+        function validateForm() {
+            if (
+                rollNo.value === "" ||
+                fullName.value === "" ||
+                className.value === "" ||
+                birthDate.value === "" ||
+                address.value === "" ||
+                enrollDate.value === ""
+            ) {
+                alert("All fields are mandatory");
+                return false;
+            }
+            return true;
+        }
+
+        
+        function saveData() {
+            if (!validateForm()) return;
+
+            var jsonStr = {
+                rollNo: rollNo.value,
+                fullName: fullName.value,
+                className: className.value,
+                birthDate: birthDate.value,
+                address: address.value,
+                enrollDate: enrollDate.value
+            };
+
+            var req = createPUTRequest(
+                connToken,
+                JSON.stringify(jsonStr),
+                dbName,
+                relName
+            );
+
+            executeCommandAtGivenBaseUrl(req, baseUrl, iml);
+            alert("Student data saved successfully");
+            resetForm();
+        }
+
+        
+        function updateData() {
+            if (!validateForm()) return;
+
+            var jsonStr = {
+                rollNo: rollNo.value,
+                fullName: fullName.value,
+                className: className.value,
+                birthDate: birthDate.value,
+                address: address.value,
+                enrollDate: enrollDate.value
+            };
+
+            var req = createUPDATERecordRequest(
+                connToken,
+                JSON.stringify(jsonStr),
+                dbName,
+                relName,
+                rollNo.value
+            );
+
+            executeCommandAtGivenBaseUrl(req, baseUrl, iml);
+            alert("Student data updated successfully");
+            resetForm();
+        }
+    </script>
+</head>
+
+<body onload="resetForm()">
+
+<div class="container">
+    <h2 class="text-center">Student Enrollment Form</h2>
+
+    <form id="studentForm">
+        <div class="form-group">
+            <label>Roll No</label>
+            <input type="text" id="rollNo" class="form-control"
+                   onblur="checkRollNo()">
+        </div>
+
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="fullName" class="form-control" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Class</label>
+            <input type="text" id="className" class="form-control" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Birth Date</label>
+            <input type="date" id="birthDate" class="form-control" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Address</label>
+            <input type="text" id="address" class="form-control" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Enrollment Date</label>
+            <input type="date" id="enrollDate" class="form-control" disabled>
+        </div>
+
+        <div class="text-center">
+            <button type="button" id="saveBtn"
+                    class="btn btn-success" disabled onclick="saveData()">Save</button>
+
+            <button type="button" id="updateBtn"
+                    class="btn btn-primary" disabled onclick="updateData()">Update</button>
+
+            <button type="button" id="resetBtn"
+                    class="btn btn-warning" disabled onclick="resetForm()">Reset</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
